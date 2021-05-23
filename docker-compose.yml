@@ -1,0 +1,73 @@
+version: '3'
+
+services:
+  # found on docker hub
+  postgres:
+    # latest means use the most current version
+    image: 'postgres:latest'
+    environment:
+      - POSTGRES_PASSWORD=postgres_password
+  # found on docker hub
+  redis:
+    image: 'redis:latest'
+  # main webserver for all the routing
+  nginx:
+    depends_on:
+      - api
+      - client
+    #should be running all the time
+    restart: always
+    #since we are doing a special config on default.conf need to use custom build
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    #map ports local machine to container port 80
+    # normally would probably be '80:80'
+    ports:
+    - '3050:80'
+  # local service - in ./server directory
+  api:
+    build:
+      # do not specify context (folder location here - use context below)
+      dockerfile: Dockerfile.dev
+      #since we are in root level - look a folder down
+      context: ./server
+    # refer back to Docerfile.dev to find where the app working directory is
+    volumes:
+      # keep everything in the nodes modules in the container (do not overwrite)
+      - /app/node_modules
+      # copy everything else from the server into the /app directory on container
+      # (will not affect node_modules due to line above) - allow for refreshing of source code
+      - ./server:/app
+    #Note - without equals means pull environment variable
+    environment:
+      # existing service so just use name of service
+      - REDIS_HOST=redis
+      # default port - check docker hub
+      - REDIS_PORT=6379
+      - PGUSER=postgres
+      - PGHOST=postgres
+      - PGDATABASE=postgres
+      - PGPASSWORD=postgres_password
+      - PGPORT=5432
+  # another local service
+  client:
+    stdin_open: true
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./client
+    volumes:
+      #again - do not ovewrite node modules in container
+      - /app/node_modules
+      # make sure all other files and folders are copied over to app director of container
+      - ./client:/app
+  worker:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./worker
+    volumes:
+      - /app/node_modules
+      - ./worker:/app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379

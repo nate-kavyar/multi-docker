@@ -1,0 +1,21 @@
+#to build use: docker build -f Dockerfile.dev .
+# the ending period specifies the current directory as the build context
+# base image
+FROM node:alpine
+
+#working directory on the base image
+WORKDIR '/app'
+
+#copy only package.json to base image working directory
+COPY ./package.json ./
+
+#install modules on base image
+RUN npm install
+
+#copy all the dev (src) files onto base image - this order
+#prevents copying over all the extra modules
+COPY . .
+
+#default command - run command 'npm run start'
+# runs the start script
+CMD ["npm", "run", "start"]
