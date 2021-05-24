@@ -22,7 +22,7 @@ after_success:
   - docker build -t natekavyar/multi-client ./client
   #build the rest of the images - no other ones have tests so they are not in the scripts file
   - docker build -t natekavyar/multi-nginx ./nginx
-  - docker build -t natekavayr/multi-server ./server
+  - docker build -t natekavyar/multi-server ./server
   - docker build -t natekavyar/multi-worker ./worker
 
   #Log in to the docker CLI
