@@ -1,0 +1,35 @@
+#this is going to build multiple containters so each docker file needs to be referenced
+sudo: required
+services:
+  - docker
+
+#this is to run the tests
+before_install:
+  # build the client and run tests - docker file and context must be relative to the client directory
+  - docker build -t natekavyar/react-test -f ./client/Dockerfile.dev ./client
+
+# primary test running section
+# any scripts that do not exit with 0 will cause the build to fail
+script:
+  # since this is running in a container pass in the environment variable (-e) and indicate it is running in
+  # a container this will cause it to exit with 0 if all tests pass
+  - docker run -e CI=true natekavyar/react-test npm test
+
+# if all tests pass from script section then build the produciton version
+after_success:
+  # build the docker image with the specified tag for the client context (./client) - note the dockerfile is not specified
+  # since it will use the default Dockerfile
+  - docker build -t natekavyar/multi-client ./client
+  #build the rest of the images - no other ones have tests so they are not in the scripts file
+  - docker build -t natekavyar/multi-nginx ./nginx
+  - docker build -t natekavayr/multi-server ./server
+  - docker build -t natekavyar/multi-worker ./worker
+
+  #Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+  # take those images and push them to docker hub
+  - docker push natekavyar/multi-client
+  - docker push natekavyar/multi-nginx
+  - docker push natekavyar/multi-server
+  - docker push natekavyar/multi-worker
