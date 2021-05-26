@@ -5,6 +5,7 @@ services:
   postgres:
     # latest means use the most current version
     image: 'postgres:latest'
+    # must set the postgres password for the container
     environment:
       - POSTGRES_PASSWORD=postgres_password
   # found on docker hub
@@ -39,7 +40,7 @@ services:
       # copy everything else from the server into the /app directory on container
       # (will not affect node_modules due to line above) - allow for refreshing of source code
       - ./server:/app
-    #Note - without equals means pull environment variable
+    #Note - without equals means pull environment variable from the local machine (your machine)
     environment:
       # existing service so just use name of service
       - REDIS_HOST=redis
