@@ -35,13 +35,21 @@ after_success:
   - docker push natekavyar/multi-worker
 
 deploy:
+  # use the elasticbeanstalk provider
   provider: elasticbeanstalk
+  # aws region you are deploying to - found in url or if you want to specifiy
   region: 'us-east-1'
+  # app can be found in the Elastic Beanstalk > Environments > Multidocker-env
   app: 'multi-docker'
+  # The main envionment being deployed to
   env: 'Multidocker-env'
+  #bucket to store the deployment code in
   bucket_name: 'elasticbeanstalk-us-east-1-814281708660'
+  # bucket path to store the deployment code in
   bucket_path: docker-multi
   on:
+    #only do this for commits on the master branch
     branch: master
+  #aws keys to allow travis to deploy
   access_key_id: $AWS_ACCESS_KEY
   secret_access_key: $AWS_SECRET_KEY
