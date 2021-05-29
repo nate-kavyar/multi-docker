@@ -5,7 +5,7 @@ FROM node:alpine as builder
 WORKDIR '/app'
 
 # copy over just pakcage .json for node dependencies
-COPY package.json ./
+COPY ./package.json ./
 
 #install modules on container
 RUN npm install
@@ -31,4 +31,4 @@ COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 # copy over the production build built above to nginx directory
 # node will put the production build into the build directory of app
 # (react create app defaults)
-COPY --from=builder /app/build /user/share/nginx/html
+COPY --from=builder /app/build /usr/share/nginx/html
